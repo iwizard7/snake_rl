@@ -3,7 +3,6 @@ from game.snake_game import SnakeGameAI
 from agent.dqn_agent import DQNAgent
 from visualization import plotter
 from visualization.heatmap import show_q_heatmap
-from visualization.plotter import play_flag, pause_flag
 
 def train():
     scores = []
@@ -20,28 +19,22 @@ def train():
         while game.running:
             game.process_events()
 
-            if play_flag:
-                game.paused = False
-
-            if pause_flag:
-                game.paused = True
-
-            if plotter.save_clicked:
+            if game.save_model:
                 agent.model.save('saved_model.pth')
                 print('Model saved as saved_model.pth')
-                plotter.save_clicked = False
+                game.save_model = False
 
-            if plotter.load_clicked:
+            if game.load_model:
                 try:
                     agent.model.load_state_dict(torch.load('saved_model.pth'))
                     print('Model loaded from saved_model.pth')
                 except FileNotFoundError:
                     print('Saved model not found')
-                plotter.load_clicked = False
+                game.load_model = False
 
-            if plotter.qmap_clicked:
+            if game.show_heatmap:
                 show_q_heatmap(agent, game.grid_size, 0)
-                plotter.qmap_clicked = False
+                game.show_heatmap = False
 
             if game.paused:
                 game.render()
