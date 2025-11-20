@@ -1,3 +1,4 @@
+import torch
 from game.snake_game import SnakeGameAI
 from agent.dqn_agent import DQNAgent
 from visualization.plotter import plot
@@ -13,6 +14,19 @@ def train():
     try:
         while game.running:
             game.process_events()
+
+            if game.save_model:
+                agent.model.save('saved_model.pth')
+                print('Model saved as saved_model.pth')
+                game.save_model = False
+
+            if game.load_model:
+                try:
+                    agent.model.load_state_dict(torch.load('saved_model.pth'))
+                    print('Model loaded from saved_model.pth')
+                except FileNotFoundError:
+                    print('Saved model not found')
+                game.load_model = False
 
             if game.paused:
                 game.render()
