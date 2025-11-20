@@ -256,5 +256,9 @@ class SnakeGameAI:
         # Approximate distance before and after move
         dist_before = np.linalg.norm(np.array(self.snake[0]) - np.array(self.food))
         dist_after = np.linalg.norm(np.array(self.head) - np.array(self.food))
-        reward = 0.1 if dist_after < dist_before else -0.1
-        return reward
+        shaping_reward = 0.1 if dist_after < dist_before else -0.1
+
+        # Add longevity reward for staying alive
+        longevity_reward = self.frame_iteration / 100000.0  # ~0.0001 per step, max ~0.01 per step
+
+        return shaping_reward + longevity_reward
