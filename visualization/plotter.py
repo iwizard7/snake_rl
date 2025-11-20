@@ -12,22 +12,27 @@ pause_flag = False
 def on_play(event):
     global play_flag
     play_flag = True
+    print("PLAY button clicked!")
 
 def on_pause(event):
     global pause_flag
     pause_flag = True
+    print("PAUSE button clicked!")
 
 def on_load(event):
     global load_clicked
     load_clicked = True
+    print("LOAD button clicked!")
 
 def on_save(event):
     global save_clicked
     save_clicked = True
+    print("SAVE button clicked!")
 
 def on_qmap(event):
     global qmap_clicked
     qmap_clicked = True
+    print("Q-MAP button clicked!")
 
 def plot(scores, mean_scores, loss_history=None):
     fig = plt.figure('Статистика обучения', figsize=(14, 8))
