@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+from matplotlib.widgets import Button
 
 plt.ion()
 
@@ -8,28 +9,28 @@ save_clicked = False
 play_flag = False
 pause_flag = False
 
-def on_click(event):
-    # Map coordinates to figure coordinates
-    if event.inaxes is None and event.y < 0.1:
-        # In the bottom margin
-        if 0.0 < event.x < 0.1:
-            global play_flag
-            play_flag = True
-        elif 0.1 < event.x < 0.2:
-            global pause_flag
-            pause_flag = True
-        elif 0.25 < event.x < 0.35:
-            global load_clicked
-            load_clicked = True
-        elif 0.4 < event.x < 0.5:
-            global save_clicked
-            save_clicked = True
-        elif 0.55 < event.x < 0.65:
-            global qmap_clicked
-            qmap_clicked = True
+def on_play(event):
+    global play_flag
+    play_flag = True
+
+def on_pause(event):
+    global pause_flag
+    pause_flag = True
+
+def on_load(event):
+    global load_clicked
+    load_clicked = True
+
+def on_save(event):
+    global save_clicked
+    save_clicked = True
+
+def on_qmap(event):
+    global qmap_clicked
+    qmap_clicked = True
 
 def plot(scores, mean_scores, loss_history=None):
-    fig = plt.figure('Статистика обучения')
+    fig = plt.figure('Статистика обучения', figsize=(14, 8))
     plt.clf()
 
     if loss_history and len(loss_history) > 0:
@@ -51,18 +52,25 @@ def plot(scores, mean_scores, loss_history=None):
         plt.legend()
         plt.grid(True)
 
-    # Add buttons at bottom
-    plt.subplots_adjust(bottom=0.15)
-    plt.text(0.05, 0.05, 'PLAY', fontsize=12, ha='center', va='center', transform=fig.transFigure,
-             bbox=dict(facecolor='green', edgecolor='black', boxstyle='round,pad=0.3'))
-    plt.text(0.15, 0.05, 'PAUSE', fontsize=12, ha='center', va='center', transform=fig.transFigure,
-             bbox=dict(facecolor='red', edgecolor='black', boxstyle='round,pad=0.3'))
-    plt.text(0.3, 0.05, 'LOAD', fontsize=12, ha='center', va='center', transform=fig.transFigure,
-             bbox=dict(facecolor='lightgreen', edgecolor='black', boxstyle='round,pad=0.3'))
-    plt.text(0.45, 0.05, 'SAVE', fontsize=12, ha='center', va='center', transform=fig.transFigure,
-             bbox=dict(facecolor='orange', edgecolor='black', boxstyle='round,pad=0.3'))
-    plt.text(0.6, 0.05, 'Q-MAP', fontsize=12, ha='center', va='center', transform=fig.transFigure,
-             bbox=dict(facecolor='lightblue', edgecolor='black', boxstyle='round,pad=0.3'))
-    fig.canvas.mpl_connect('button_press_event', on_click)
+    # Add buttons
+    ax_play = fig.add_axes([0.05, 0.01, 0.12, 0.04])
+    b_play = Button(ax_play, 'PLAY', color='green')
+    b_play.on_clicked(on_play)
+
+    ax_pause = fig.add_axes([0.17, 0.01, 0.12, 0.04])
+    b_pause = Button(ax_pause, 'PAUSE', color='red')
+    b_pause.on_clicked(on_pause)
+
+    ax_load = fig.add_axes([0.32, 0.01, 0.12, 0.04])
+    b_load = Button(ax_load, 'LOAD', color='lightgreen')
+    b_load.on_clicked(on_load)
+
+    ax_save = fig.add_axes([0.47, 0.01, 0.12, 0.04])
+    b_save = Button(ax_save, 'SAVE', color='orange')
+    b_save.on_clicked(on_save)
+
+    ax_map = fig.add_axes([0.62, 0.01, 0.12, 0.04])
+    b_map = Button(ax_map, 'Q-MAP', color='lightblue')
+    b_map.on_clicked(on_qmap)
 
     plt.pause(.1)
