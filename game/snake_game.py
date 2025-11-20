@@ -58,9 +58,9 @@ class SnakeGameAI:
                         self.paused = False
                     elif 100 <= x <= 180 and HEIGHT + 10 <= y <= HEIGHT + 40:
                         self.paused = True
-                    elif 200 <= x <= 260 and HEIGHT + 10 <= y <= HEIGHT + 40:
+                    elif 10 <= x <= 70 and HEIGHT + 45 <= y <= HEIGHT + 75:
                         self.save_model = True
-                    elif 270 <= x <= 330 and HEIGHT + 10 <= y <= HEIGHT + 40:
+                    elif 80 <= x <= 140 and HEIGHT + 45 <= y <= HEIGHT + 75:
                         self.load_model = True
 
     def step(self, action):
