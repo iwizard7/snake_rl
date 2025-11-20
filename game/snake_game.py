@@ -18,7 +18,10 @@ class SnakeGameAI:
         self.games_count = 0
         self.epsilon_value = 1.0
         self.start_time = time.time()
-        self.display = pygame.display.set_mode((self.w, self.h + 40))
+        self.save_model = False
+        self.load_model = False
+        self.show_heatmap = False
+        self.display = pygame.display.set_mode((self.w, self.h + 80))
         pygame.display.set_caption('SnakeRL')
         self.clock = pygame.time.Clock()
         self.reset()
@@ -75,6 +78,12 @@ class SnakeGameAI:
                         self.paused = True
                     elif 250 <= x <= 310 and HEIGHT + 10 <= y <= HEIGHT + 40:
                         self.active_field = 'size'
+                    elif 10 <= x <= 70 and HEIGHT + 45 <= y <= HEIGHT + 75:
+                        self.save_model = True
+                    elif 80 <= x <= 140 and HEIGHT + 45 <= y <= HEIGHT + 75:
+                        self.load_model = True
+                    elif 10 <= x <= 80 and HEIGHT + 55 <= y <= HEIGHT + 80:
+                        self.show_heatmap = True
                     else:
                         self.active_field = None
 
@@ -160,6 +169,22 @@ class SnakeGameAI:
         pygame.draw.rect(self.display, WHITE, pygame.Rect(250, HEIGHT + 10, 60, 30), 2)
         size_surf = button_font.render(self.size_text, True, WHITE)
         self.display.blit(size_surf, (255, HEIGHT + 15))
+
+        # Save and Load buttons
+        save_color = GRAY
+        pygame.draw.rect(self.display, save_color, pygame.Rect(10, HEIGHT + 45, 60, 30))
+        save_text = button_font.render('SAVE', True, BLACK)
+        self.display.blit(save_text, (15, HEIGHT + 50))
+
+        load_color = GRAY
+        pygame.draw.rect(self.display, load_color, pygame.Rect(80, HEIGHT + 45, 60, 30))
+        load_text = button_font.render('LOAD', True, BLACK)
+        self.display.blit(load_text, (85, HEIGHT + 50))
+
+        # Heatmap button
+        pygame.draw.rect(self.display, GRAY, pygame.Rect(10, HEIGHT + 55, 70, 25))
+        heatmap_text = button_font.render('Q-MAP', True, BLACK)
+        self.display.blit(heatmap_text, (15, HEIGHT + 58))
 
         pygame.display.flip()
         self.clock.tick(SPEED)
