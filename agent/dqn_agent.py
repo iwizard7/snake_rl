@@ -64,6 +64,8 @@ class QTrainer:
         loss.backward()
         self.optimizer.step()
 
+        return loss.item()
+
 class DQNAgent:
     def __init__(self, input_size=10, hidden_size=64, output_size=3, lr=0.001, gamma=0.9, epsilon=1.0, eps_decay=0.995):
         self.input_size = input_size
@@ -105,7 +107,9 @@ class DQNAgent:
         if len(self.memory) > self.batch_size:
             mini_sample = self.memory.sample(self.batch_size)
             states, actions, rewards, next_states, dones = mini_sample
-            self.trainer.train_step(states, actions, rewards, next_states, dones)
+            loss = self.trainer.train_step(states, actions, rewards, next_states, dones)
+            return loss
+        return None
         
     def decay_epsilon(self):
         if self.epsilon > 0.05:

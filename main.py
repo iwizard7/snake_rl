@@ -8,6 +8,8 @@ def train():
     mean_scores = []
     total_score = 0
     record = 0
+    loss_history = []
+    games = 0
     agent = DQNAgent()
     game = SnakeGameAI()
 
@@ -51,8 +53,10 @@ def train():
 
             if game_over:
                 # Train long memory, plot result
+                loss = agent.train_long_memory()
+                if loss is not None:
+                    loss_history.append(loss)
                 game.reset()
-                agent.train_long_memory()
                 agent.decay_epsilon()
 
                 if score > record:
@@ -61,9 +65,11 @@ def train():
 
                 scores.append(score)
                 total_score += score
+                game.games_count = len(scores)
+                game.epsilon_value = agent.epsilon
                 mean_score = total_score / len(scores)
                 mean_scores.append(mean_score)
-                plot(scores, mean_scores)
+                plot(scores, mean_scores, loss_history)
                 print(f'Game {len(scores)}, Score: {score}, Record: {record}, Mean Score: {mean_score:.2f}')
     except Exception as e:
         print(f'Error during training: {e}')

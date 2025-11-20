@@ -15,6 +15,8 @@ class SnakeGameAI:
         self.active_field = None
         self.save_model = False
         self.load_model = False
+        self.games_count = 0
+        self.epsilon_value = 1.0
         self.display = pygame.display.set_mode((self.w, self.h + 80))
         pygame.display.set_caption('SnakeRL')
         self.clock = pygame.time.Clock()
@@ -127,6 +129,12 @@ class SnakeGameAI:
         # Score
         text = font.render("Score: " + str(self.score), True, WHITE)
         self.display.blit(text, [0, 0])
+
+        # Training stats
+        games_text = button_font.render(f'Games: {self.games_count}', True, WHITE)
+        self.display.blit(games_text, (0, 50))
+        epsilon_text = button_font.render(f'Epsilon: {self.epsilon_value:.3f}', True, WHITE)
+        self.display.blit(epsilon_text, (150, 50))
 
         # Pause/play buttons
         button_font = pygame.font.SysFont('arial', 16)
