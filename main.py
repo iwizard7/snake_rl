@@ -10,7 +10,8 @@ def train():
     record = 0
     loss_history = []
     games = 0
-    agent = DQNAgent()
+    # Rainbow DQN: Double DQN + Dueling + Prioritized Replay
+    agent = DQNAgent(use_double_dqn=True, use_dueling=True, use_prioritized_replay=True)
     game = SnakeGameAI()
 
     try:

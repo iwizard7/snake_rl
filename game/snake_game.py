@@ -118,6 +118,9 @@ class SnakeGameAI:
     def render(self):
         self.display.fill(BLACK)
 
+        # Font for buttons
+        button_font = pygame.font.SysFont('arial', 16)
+
         for pt in self.snake:
             pygame.draw.rect(self.display, GREEN, pygame.Rect(pt[0]*BLOCK_SIZE, pt[1]*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE))
 
@@ -137,7 +140,6 @@ class SnakeGameAI:
         self.display.blit(epsilon_text, (150, 50))
 
         # Pause/play buttons
-        button_font = pygame.font.SysFont('arial', 16)
         play_color = GREEN if not self.paused else GRAY
         pygame.draw.rect(self.display, play_color, pygame.Rect(10, HEIGHT + 10, 80, 30))
         play_text = button_font.render('PLAY', True, BLACK)
