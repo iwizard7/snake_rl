@@ -12,10 +12,11 @@ def show_q_heatmap(agent, grid_size=20, fixed_dir=0):
     """
 
     # Создать сетку состояний
-    state_builder = agent.state_builder
     q_map = np.zeros((grid_size, grid_size, 3))  # Q для 3 действий
 
-    # Очень грубая аппроксимация состояния для визуализации
+    # Фиксированная еда в центре
+    food = [grid_size//2, grid_size//2]
+
     directions = {
         0: (-1, 0),  # LEFT
         1: (0, -1),  # UP
@@ -23,31 +24,55 @@ def show_q_heatmap(agent, grid_size=20, fixed_dir=0):
         3: (0, 1),   # DOWN
     }
 
-    food_x, food_y = grid_size//2, grid_size//2  # фиксированная еда в центре
+    curr_direction = directions[fixed_dir]
 
     for x in range(1, grid_size-1):  # Избегать краев чтобы не было столкновений
         for y in range(1, grid_size-1):
 
-            # Создать простое состояние
             head = [x, y]
-            direction = directions[fixed_dir]
-            snake = [[x, y]]  # только голова
 
-            # Построить состояние через state_builder
-            from agent.state_builder import StateBuilder
-            fake_state_builder = StateBuilder()
+            # Вычислить состояние вручную (повторяя логику StateBuilder)
 
-            # Создать fake game объект
-            class FakeGame:
-                def __init__(self, head, direction, snake, food, grid_size):
-                    self.head = head
-                    self.direction = direction
-                    self.snake = snake
-                    self.food = food
-                    self.grid_size = grid_size
+            # Danger checks
+            danger_straight = (x + curr_direction[0] < 0 or x + curr_direction[0] >= grid_size or
+                             y + curr_direction[1] < 0 or y + curr_direction[1] >= grid_size)
 
-            fake_game = FakeGame(head, direction, snake, [food_x, food_y], grid_size)
-            state = fake_state_builder.build_state(fake_game)
+            left_dir = (-curr_direction[1], curr_direction[0])  # поворот налево
+            danger_left = (x + left_dir[0] < 0 or x + left_dir[0] >= grid_size or
+                          y + left_dir[1] < 0 or y + left_dir[1] >= grid_size)
+
+            right_dir = (curr_direction[1], -curr_direction[0])  # поворот направо
+            danger_right = (x + right_dir[0] < 0 or x + right_dir[0] >= grid_size or
+                           y + right_dir[1] < 0 or y + right_dir[1] >= grid_size)
+
+            # Food direction relative to movement
+            straight_pos = [x + curr_direction[0], y + curr_direction[1]]
+            food_straight = straight_pos == food
+
+            left_pos = [x + left_dir[0], y + left_dir[1]]
+            food_left = left_pos == food
+
+            right_pos = [x + right_dir[0], y + right_dir[1]]
+            food_right = right_pos == food
+
+            # Direction one-hot
+            dir_l = curr_direction == (-1, 0)
+            dir_u = curr_direction == (0, -1)
+            dir_r = curr_direction == (1, 0)
+            dir_d = curr_direction == (0, 1)
+
+            state = [
+                float(danger_straight),      # danger straight
+                float(danger_left),          # danger left
+                float(danger_right),         # danger right
+                float(food_left),            # food left
+                float(food_right),           # food right
+                float(food_straight),        # food straight
+                float(dir_l),                # direction left
+                float(dir_u),                # direction up
+                float(dir_r),                # direction right
+                float(dir_d),                # direction down
+            ]
 
             # Получить Q-значения
             state_tensor = torch.tensor(state, dtype=torch.float).to(agent.trainer.model.device).unsqueeze(0)
