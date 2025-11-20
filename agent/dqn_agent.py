@@ -49,7 +49,14 @@ class QTrainer:
         self.lr = lr
         self.gamma = gamma
         self.model = model
-        self.target_model = Linear_QNet(model.linear1.in_features, model.hidden_size, model.linear3.out_features, dueling=model.dueling).to(DEVICE)
+        
+        # Determine output size for target model
+        if self.model.dueling:
+            output_size = self.model.advantage_net.out_features
+        else:
+            output_size = self.model.linear3.out_features
+            
+        self.target_model = Linear_QNet(self.model.linear1.in_features, self.model.hidden_size, output_size, dueling=self.model.dueling).to(DEVICE)
         self.target_model.load_state_dict(self.model.state_dict())
         self.optimizer = optim.Adam(model.parameters(), lr=self.lr)
         self.criterion = nn.MSELoss()

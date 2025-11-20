@@ -1,6 +1,8 @@
 import pygame
 import random
 import numpy as np
+import time
+import psutil
 from game.config import *
 
 pygame.init()
@@ -17,7 +19,9 @@ class SnakeGameAI:
         self.load_model = False
         self.games_count = 0
         self.epsilon_value = 1.0
-        self.display = pygame.display.set_mode((self.w, self.h + 80))
+        self.start_time = time.time()
+        self.show_heatmap = False
+        self.display = pygame.display.set_mode((self.w, self.h + 85))
         pygame.display.set_caption('SnakeRL')
         self.clock = pygame.time.Clock()
         self.reset()
@@ -53,7 +57,7 @@ class SnakeGameAI:
                     if event.key == pygame.K_BACKSPACE:
                         self.size_text = self.size_text[:-1]
                     elif event.key >= pygame.K_0 and event.key <= pygame.K_9:
-                        if len(self.size_text) < 2:  # max 2 digits
+                        if len(self.size_text) < 2:
                             self.size_text += chr(event.key - pygame.K_0 + ord('0'))
                     elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
                         try:
@@ -66,7 +70,7 @@ class SnakeGameAI:
                         except ValueError:
                             pass
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:  # left click
+                if event.button == 1:
                     x, y = pygame.mouse.get_pos()
                     if 10 <= x <= 90 and HEIGHT + 10 <= y <= HEIGHT + 40:
                         self.paused = False
@@ -78,39 +82,40 @@ class SnakeGameAI:
                         self.save_model = True
                     elif 80 <= x <= 140 and HEIGHT + 45 <= y <= HEIGHT + 75:
                         self.load_model = True
+                    elif 10 <= x <= 80 and HEIGHT + 55 <= y <= HEIGHT + 80:
+                        self.show_heatmap = True
                     else:
                         self.active_field = None
 
     def step(self, action):
         self.frame_iteration += 1
-        # 1. Get state
+        # Get state
         state = self._get_state()
 
-        # 2. Perform action
+        # Move
         self._move(action)
         self.snake.insert(0, self.head)
 
-        # 3. Check collision
+        # Check collision
         reward = 0
         if self.is_collision(self.head) or self.frame_iteration > 100 * len(self.snake):
             reward = -10
             self.done = True
             return state, reward, self.done
 
-        # 4. Eat food
+        # Eat food
         if self.head == self.food:
             self.score += 1
             reward = 10
             self._place_food()
-            # No pop when eating
         else:
             self.snake.pop()
 
-        # Shaping reward: moving closer or farther from food
+        # Shaping reward
         if not self.done:
             reward += self._calculate_shaping_reward()
 
-        # 5. Update ui
+        # Update ui
         self.render()
 
         return state, reward, self.done
@@ -120,6 +125,7 @@ class SnakeGameAI:
 
         # Font for buttons
         button_font = pygame.font.SysFont('arial', 16)
+        metrics_font = pygame.font.SysFont('arial', 14)
 
         for pt in self.snake:
             pygame.draw.rect(self.display, GREEN, pygame.Rect(pt[0]*BLOCK_SIZE, pt[1]*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE))
@@ -139,14 +145,31 @@ class SnakeGameAI:
         epsilon_text = button_font.render(f'Epsilon: {self.epsilon_value:.3f}', True, WHITE)
         self.display.blit(epsilon_text, (150, 50))
 
-        # Pause/play buttons
-        play_color = GREEN if not self.paused else GRAY
-        pygame.draw.rect(self.display, play_color, pygame.Rect(10, HEIGHT + 10, 80, 30))
-        play_text = button_font.render('PLAY', True, BLACK)
-        self.display.blit(play_text, (20, HEIGHT + 15))
+        # Real-time metrics
+        elapsed = time.time() - self.start_time
+        time_text = metrics_font.render(f'Время: {elapsed:.1f}s', True, WHITE)
+        self.display.blit(time_text, (0, 70))
 
-        pause_color = RED if self.paused else GRAY
-        pygame.draw.rect(self.display, pause_color, pygame.Rect(100, HEIGHT + 10, 80, 30))
+        fps = self.clock.get_fps()
+        fps_text = metrics_font.render(f'FPS: {fps:.1f}', True, WHITE)
+        self.display.blit(fps_text, (100, 70))
+
+        if psutil:
+            mem_usage = psutil.virtual_memory().percent
+            mem_text = metrics_font.render(f'RAM: {mem_usage:.1f}%', True, WHITE)
+            self.display.blit(mem_text, (200, 70))
+
+        # Pause/play buttons
+        if not self.paused:
+            pygame.draw.rect(self.display, GREEN, pygame.Rect(10, HEIGHT + 10, 80, 30))
+            play_text = button_font.render('PLAY', True, BLACK)
+            self.display.blit(play_text, (20, HEIGHT + 15))
+        else:
+            pygame.draw.rect(self.display, GRAY, pygame.Rect(10, HEIGHT + 10, 80, 30))
+            paused_text = button_font.render('PAUSED', True, BLACK)
+            self.display.blit(paused_text, (15, HEIGHT + 15))
+
+        pygame.draw.rect(self.display, RED if self.paused else GRAY, pygame.Rect(100, HEIGHT + 10, 80, 30))
         pause_text = button_font.render('PAUSE', True, BLACK)
         self.display.blit(pause_text, (110, HEIGHT + 15))
 
@@ -172,8 +195,12 @@ class SnakeGameAI:
         load_text = button_font.render('LOAD', True, BLACK)
         self.display.blit(load_text, (85, HEIGHT + 50))
 
-        pygame.display.flip()
+        # Heatmap button
+        pygame.draw.rect(self.display, GRAY, pygame.Rect(10, HEIGHT + 55, 70, 25))
+        heatmap_text = button_font.render('Q-MAP', True, BLACK)
+        self.display.blit(heatmap_text, (15, HEIGHT + 58))
 
+        pygame.display.flip()
         self.clock.tick(SPEED)
 
     def is_collision(self, pt=None):
@@ -192,12 +219,12 @@ class SnakeGameAI:
         clock_wise = [(-1, 0), (0, -1), (1, 0), (0, 1)]  # LEFT, UP, RIGHT, DOWN
         idx = clock_wise.index(self.direction)
 
-        if action == ACTION_STRAIGHT:  # straight
+        if action == ACTION_STRAIGHT:
             new_dir = clock_wise[idx]
-        elif action == ACTION_RIGHT:  # right turn
+        elif action == ACTION_RIGHT:
             next_idx = (idx + 1) % 4
             new_dir = clock_wise[next_idx]
-        elif action == ACTION_LEFT:  # left turn
+        elif action == ACTION_LEFT:
             next_idx = (idx - 1) % 4
             new_dir = clock_wise[next_idx]
 
@@ -227,23 +254,14 @@ class SnakeGameAI:
         right_dir = (self.direction[1], -self.direction[0])
         danger_right = self.is_collision([head[0] + right_dir[0], head[1] + right_dir[1]])
 
-        # Food location relative - simple
-        food_left = self.food[0] < head[0]
-        food_right = self.food[0] > head[0]
-        food_up = self.food[1] < head[1]
-        food_down = self.food[1] > head[1]
-
-        # But to make relative, perhaps calculate for each action direction
-        # For straight
+        # Food location relative
         straight_pos = [head[0] + self.direction[0], head[1] + self.direction[1]]
         food_straight = straight_pos[0] == self.food[0] and straight_pos[1] == self.food[1]
 
-        # For left turn
         left_turn_dir = (-self.direction[1], self.direction[0])
         left_pos = [head[0] + left_turn_dir[0], head[1] + left_turn_dir[1]]
         food_left_rel = left_pos[0] == self.food[0] and left_pos[1] == self.food[1]
 
-        # For right turn
         right_turn_dir = (self.direction[1], -self.direction[0])
         right_pos = [head[0] + right_turn_dir[0], head[1] + right_turn_dir[1]]
         food_right_rel = right_pos[0] == self.food[0] and right_pos[1] == self.food[1]

@@ -2,6 +2,7 @@ import torch
 from game.snake_game import SnakeGameAI
 from agent.dqn_agent import DQNAgent
 from visualization.plotter import plot
+from visualization.heatmap import show_q_heatmap
 
 def train():
     scores = []
@@ -30,6 +31,10 @@ def train():
                 except FileNotFoundError:
                     print('Saved model not found')
                 game.load_model = False
+
+            if game.show_heatmap:
+                show_q_heatmap(agent, game.grid_size, 0)
+                game.show_heatmap = False
 
             if game.paused:
                 game.render()
