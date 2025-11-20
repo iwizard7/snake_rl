@@ -35,10 +35,17 @@ def train():
                 game.load_model = False
 
             if game.show_heatmap:
-                # Heatmap ready for regular Q-learning agents
-                # show_q_heatmap(agent, game.grid_size, 0)
-                print("Q-Heatmap: available for Q-learning agents, not NN-based")
+                show_q_heatmap(agent, game.grid_size, 0)
                 game.show_heatmap = False
+
+            if game.export_onnx:
+                success = agent.export_to_onnx('model.onnx')
+                if success:
+                    print('ONNX export successful: model.onnx')
+                    game.onnx_feedback = 90
+                else:
+                    print('ONNX export failed')
+                game.export_onnx = False
 
             if game.paused:
                 game.render()

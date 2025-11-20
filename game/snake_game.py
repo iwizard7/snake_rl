@@ -19,8 +19,10 @@ class SnakeGameAI:
         self.save_model = False
         self.load_model = False
         self.show_heatmap = False
+        self.export_onnx = False
         self.save_feedback = 0
         self.load_feedback = 0
+        self.onnx_feedback = 0
         self.display = pygame.display.set_mode((self.w, self.h + 80))
         pygame.display.set_caption('SnakeRL')
         self.clock = pygame.time.Clock()
@@ -64,6 +66,10 @@ class SnakeGameAI:
                         self.save_model = True
                     elif 80 <= x <= 140 and HEIGHT + 45 <= y <= HEIGHT + 75:
                         self.load_model = True
+                    elif 150 <= x <= 210 and HEIGHT + 45 <= y <= HEIGHT + 75:
+                        self.show_heatmap = True
+                    elif 220 <= x <= 290 and HEIGHT + 45 <= y <= HEIGHT + 75:
+                        self.export_onnx = True
 
     def step(self, action):
         self.frame_iteration += 1
@@ -170,6 +176,20 @@ class SnakeGameAI:
         self.display.blit(load_text, (85 if self.load_feedback == 0 else 75, HEIGHT + 50))
         if self.load_feedback > 0:
             self.load_feedback -= 1
+
+        # Q-Map button
+        heatmap_color = ORANGE if self.show_heatmap else GRAY
+        pygame.draw.rect(self.display, heatmap_color, pygame.Rect(150, HEIGHT + 45, 60, 30))
+        heatmap_text = button_font.render('Q-MAP', True, BLACK)
+        self.display.blit(heatmap_text, (155, HEIGHT + 50))
+
+        # ONNX export button
+        onnx_color = PURPLE if self.export_onnx or self.onnx_feedback > 0 else GRAY
+        pygame.draw.rect(self.display, onnx_color, pygame.Rect(220, HEIGHT + 45, 70, 30))
+        onnx_text = button_font.render('EXPORT' if self.export_onnx or self.onnx_feedback > 0 else 'ONNX', True, BLACK)
+        self.display.blit(onnx_text, (225, HEIGHT + 50))
+        if self.onnx_feedback > 0:
+            self.onnx_feedback -= 1
 
         pygame.display.flip()
         self.clock.tick(SPEED)

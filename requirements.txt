@@ -1,6 +1,8 @@
 pygame
 torch
+torchvision
 matplotlib
-numpy
-ipython
+pygame
 psutil
+onnx
+onnxruntime

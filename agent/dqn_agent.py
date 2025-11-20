@@ -191,3 +191,49 @@ class DQNAgent:
     def decay_epsilon(self):
         if self.epsilon > 0.05:
             self.epsilon *= self.eps_decay
+
+    def export_to_onnx(self, file_path='model.onnx'):
+        """Экспорт модели в ONNX формат для использования в других фреймворках"""
+        try:
+            import torch.onnx as onnx
+
+            # Создание dummy input для экспорта
+            input_example = torch.randn(1, 10).to(self.model.device)
+
+            # Аргументы еще не приняты
+            torch.onnx.export(
+                self.model,
+                input_example,
+                file_path,
+                export_params=True,
+                opset_version=11,
+                do_constant_folding=True,
+                input_names=['input'],
+                output_names=['output'],
+                dynamic_axes={'input': {0: 'batch_size'}, 'output': {0: 'batch_size'}}
+            )
+            print(f"Model exported to {file_path} in ONNX format")
+            return True
+        except Exception as e:
+            print(f"Failed to export to ONNX: {e}")
+            return False
+
+    def load_and_run_onnx(self, onnx_path='model.onnx', input_data=None):
+        """Загрузка и инференс ONNX модели для тестирования"""
+        try:
+            import onnxruntime as ort
+
+            session = ort.InferenceSession(onnx_path)
+            input_name = session.get_inputs()[0].name
+
+            if input_data is None:
+                input_data = torch.randn(1, 10).numpy()
+
+            # Запуск инференса
+            result = session.run(None, {input_name: input_data})
+            print(f"ONNX inference successful. Output shape: {result[0].shape}")
+
+            return result
+        except Exception as e:
+            print(f"Failed to run ONNX inference: {e}")
+            return None
