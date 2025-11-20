@@ -1,8 +1,9 @@
 import torch
 from game.snake_game import SnakeGameAI
 from agent.dqn_agent import DQNAgent
-from visualization.plotter import plot
+from visualization import plotter
 from visualization.heatmap import show_q_heatmap
+from visualization.plotter import play_flag, pause_flag
 
 def train():
     scores = []
@@ -19,22 +20,28 @@ def train():
         while game.running:
             game.process_events()
 
-            if game.save_model:
+            if play_flag:
+                game.paused = False
+
+            if pause_flag:
+                game.paused = True
+
+            if plotter.save_clicked:
                 agent.model.save('saved_model.pth')
                 print('Model saved as saved_model.pth')
-                game.save_model = False
+                plotter.save_clicked = False
 
-            if game.load_model:
+            if plotter.load_clicked:
                 try:
                     agent.model.load_state_dict(torch.load('saved_model.pth'))
                     print('Model loaded from saved_model.pth')
                 except FileNotFoundError:
                     print('Saved model not found')
-                game.load_model = False
+                plotter.load_clicked = False
 
-            if game.show_heatmap:
+            if plotter.qmap_clicked:
                 show_q_heatmap(agent, game.grid_size, 0)
-                game.show_heatmap = False
+                plotter.qmap_clicked = False
 
             if game.paused:
                 game.render()
@@ -75,7 +82,7 @@ def train():
                 game.epsilon_value = agent.epsilon
                 mean_score = total_score / len(scores)
                 mean_scores.append(mean_score)
-                plot(scores, mean_scores, loss_history)
+                plotter.plot(scores, mean_scores, loss_history)
                 print(f'Game {len(scores)}, Score: {score}, Record: {record}, Mean Score: {mean_score:.2f}')
     except Exception as e:
         print(f'Error during training: {e}')
