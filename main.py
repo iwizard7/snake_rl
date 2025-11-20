@@ -26,7 +26,7 @@ def train():
 
             if game.load_model:
                 try:
-                    agent.model = torch.load('saved_model.pth')
+                    agent.model.load_state_dict(torch.load('saved_model.pth'))
                     print('Model loaded from saved_model.pth')
                 except FileNotFoundError:
                     print('Saved model not found')

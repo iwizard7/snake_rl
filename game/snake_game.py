@@ -13,8 +13,6 @@ class SnakeGameAI:
         self.w = w
         self.h = h
         self.grid_size = GRID_SIZE
-        self.size_text = str(self.grid_size)
-        self.active_field = None
         self.games_count = 0
         self.epsilon_value = 1.0
         self.start_time = time.time()
@@ -64,28 +62,6 @@ class SnakeGameAI:
                         self.save_model = True
                     elif 270 <= x <= 330 and HEIGHT + 10 <= y <= HEIGHT + 40:
                         self.load_model = True
-                    elif 240 <= x <= 270 and HEIGHT + 10 <= y <= HEIGHT + 40:
-                        self.grid_size = 10
-                        print('Grid size set to 10')
-                        self.reset()
-                    elif 275 <= x <= 305 and HEIGHT + 10 <= y <= HEIGHT + 40:
-                        self.grid_size = 15
-                        print('Grid size set to 15')
-                        self.reset()
-                    elif 310 <= x <= 340 and HEIGHT + 10 <= y <= HEIGHT + 40:
-                        self.grid_size = 20
-                        print('Grid size set to 20')
-                        self.reset()
-                    elif 345 <= x <= 375 and HEIGHT + 10 <= y <= HEIGHT + 40:
-                        self.grid_size = 25
-                        print('Grid size set to 25')
-                        self.reset()
-                    elif 380 <= x <= 410 and HEIGHT + 10 <= y <= HEIGHT + 40:
-                        self.grid_size = 30
-                        print('Grid size set to 30')
-                        self.reset()
-                    else:
-                        self.active_field = None
 
     def step(self, action):
         self.frame_iteration += 1
@@ -177,34 +153,6 @@ class SnakeGameAI:
         pause_text = button_font.render('PAUSE', True, BLACK)
         self.display.blit(pause_text, (110, HEIGHT + 15))
 
-        # Grid size selection buttons
-        grid_label = button_font.render('Grid:', True, WHITE)
-        self.display.blit(grid_label, (200, HEIGHT + 15))
-
-        # 10 size button
-        pygame.draw.rect(self.display, GRAY, pygame.Rect(240, HEIGHT + 10, 30, 30))
-        ten_text = button_font.render('10', True, BLACK)
-        self.display.blit(ten_text, (248, HEIGHT + 15))
-
-        # 15 size button
-        pygame.draw.rect(self.display, GRAY, pygame.Rect(275, HEIGHT + 10, 30, 30))
-        fifteen_text = button_font.render('15', True, BLACK)
-        self.display.blit(fifteen_text, (283, HEIGHT + 15))
-
-        # 20 size button
-        pygame.draw.rect(self.display, GRAY, pygame.Rect(310, HEIGHT + 10, 30, 30))
-        twenty_text = button_font.render('20', True, BLACK)
-        self.display.blit(twenty_text, (318, HEIGHT + 15))
-
-        # 25 size button
-        pygame.draw.rect(self.display, GRAY, pygame.Rect(345, HEIGHT + 10, 30, 30))
-        twentyfive_text = button_font.render('25', True, BLACK)
-        self.display.blit(twentyfive_text, (353, HEIGHT + 15))
-
-        # 30 size button
-        pygame.draw.rect(self.display, GRAY, pygame.Rect(380, HEIGHT + 10, 30, 30))
-        thirty_text = button_font.render('30', True, BLACK)
-        self.display.blit(thirty_text, (388, HEIGHT + 15))
 
         # Save and Load buttons
         save_color = GRAY
