@@ -53,22 +53,6 @@ class SnakeGameAI:
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_p:
                     self.paused = not self.paused
-                elif self.active_field == 'size':
-                    if event.key == pygame.K_BACKSPACE:
-                        self.size_text = self.size_text[:-1]
-                    elif event.key >= pygame.K_0 and event.key <= pygame.K_9:
-                        if len(self.size_text) < 2:
-                            self.size_text += chr(event.key - pygame.K_0 + ord('0'))
-                    elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
-                        try:
-                            new_size = int(self.size_text)
-                            if 5 <= new_size <= 50:
-                                self.grid_size = new_size
-                                self.size_text = str(self.grid_size)
-                                print(f'Grid size set to {new_size}')
-                                self.reset()
-                        except ValueError:
-                            pass
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     x, y = pygame.mouse.get_pos()
@@ -80,10 +64,26 @@ class SnakeGameAI:
                         self.save_model = True
                     elif 270 <= x <= 330 and HEIGHT + 10 <= y <= HEIGHT + 40:
                         self.load_model = True
-                    elif 340 <= x <= 410 and HEIGHT + 10 <= y <= HEIGHT + 35:
-                        self.show_heatmap = True
-                    elif 250 <= x <= 310 and HEIGHT + 10 <= y <= HEIGHT + 40:
-                        self.active_field = 'size'
+                    elif 240 <= x <= 270 and HEIGHT + 10 <= y <= HEIGHT + 40:
+                        self.grid_size = 10
+                        print('Grid size set to 10')
+                        self.reset()
+                    elif 275 <= x <= 305 and HEIGHT + 10 <= y <= HEIGHT + 40:
+                        self.grid_size = 15
+                        print('Grid size set to 15')
+                        self.reset()
+                    elif 310 <= x <= 340 and HEIGHT + 10 <= y <= HEIGHT + 40:
+                        self.grid_size = 20
+                        print('Grid size set to 20')
+                        self.reset()
+                    elif 345 <= x <= 375 and HEIGHT + 10 <= y <= HEIGHT + 40:
+                        self.grid_size = 25
+                        print('Grid size set to 25')
+                        self.reset()
+                    elif 380 <= x <= 410 and HEIGHT + 10 <= y <= HEIGHT + 40:
+                        self.grid_size = 30
+                        print('Grid size set to 30')
+                        self.reset()
                     else:
                         self.active_field = None
 
@@ -177,28 +177,45 @@ class SnakeGameAI:
         pause_text = button_font.render('PAUSE', True, BLACK)
         self.display.blit(pause_text, (110, HEIGHT + 15))
 
-        # Input field for grid size
-        size_label = button_font.render('Size:', True, WHITE)
-        self.display.blit(size_label, (200, HEIGHT + 15))
-        pygame.draw.rect(self.display, WHITE, pygame.Rect(250, HEIGHT + 10, 60, 30), 2)
-        size_surf = button_font.render(self.size_text, True, WHITE)
-        self.display.blit(size_surf, (255, HEIGHT + 15))
+        # Grid size selection buttons
+        grid_label = button_font.render('Grid:', True, WHITE)
+        self.display.blit(grid_label, (200, HEIGHT + 15))
+
+        # 10 size button
+        pygame.draw.rect(self.display, GRAY, pygame.Rect(240, HEIGHT + 10, 30, 30))
+        ten_text = button_font.render('10', True, BLACK)
+        self.display.blit(ten_text, (248, HEIGHT + 15))
+
+        # 15 size button
+        pygame.draw.rect(self.display, GRAY, pygame.Rect(275, HEIGHT + 10, 30, 30))
+        fifteen_text = button_font.render('15', True, BLACK)
+        self.display.blit(fifteen_text, (283, HEIGHT + 15))
+
+        # 20 size button
+        pygame.draw.rect(self.display, GRAY, pygame.Rect(310, HEIGHT + 10, 30, 30))
+        twenty_text = button_font.render('20', True, BLACK)
+        self.display.blit(twenty_text, (318, HEIGHT + 15))
+
+        # 25 size button
+        pygame.draw.rect(self.display, GRAY, pygame.Rect(345, HEIGHT + 10, 30, 30))
+        twentyfive_text = button_font.render('25', True, BLACK)
+        self.display.blit(twentyfive_text, (353, HEIGHT + 15))
+
+        # 30 size button
+        pygame.draw.rect(self.display, GRAY, pygame.Rect(380, HEIGHT + 10, 30, 30))
+        thirty_text = button_font.render('30', True, BLACK)
+        self.display.blit(thirty_text, (388, HEIGHT + 15))
 
         # Save and Load buttons
         save_color = GRAY
-        pygame.draw.rect(self.display, save_color, pygame.Rect(200, HEIGHT + 10, 60, 30))
+        pygame.draw.rect(self.display, save_color, pygame.Rect(10, HEIGHT + 45, 60, 30))
         save_text = button_font.render('SAVE', True, BLACK)
-        self.display.blit(save_text, (205, HEIGHT + 15))
+        self.display.blit(save_text, (15, HEIGHT + 50))
 
         load_color = GRAY
-        pygame.draw.rect(self.display, load_color, pygame.Rect(270, HEIGHT + 10, 60, 30))
+        pygame.draw.rect(self.display, load_color, pygame.Rect(80, HEIGHT + 45, 60, 30))
         load_text = button_font.render('LOAD', True, BLACK)
-        self.display.blit(load_text, (275, HEIGHT + 15))
-
-        # Heatmap button
-        pygame.draw.rect(self.display, GRAY, pygame.Rect(340, HEIGHT + 10, 70, 25))
-        heatmap_text = button_font.render('Q-MAP', True, BLACK)
-        self.display.blit(heatmap_text, (345, HEIGHT + 13))
+        self.display.blit(load_text, (85, HEIGHT + 50))
 
         pygame.display.flip()
         self.clock.tick(SPEED)
