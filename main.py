@@ -26,14 +26,16 @@ def train():
 
             if game.load_model:
                 try:
-                    agent.model.load_state_dict(torch.load('saved_model.pth'))
+                    agent.model = torch.load('saved_model.pth')
                     print('Model loaded from saved_model.pth')
                 except FileNotFoundError:
                     print('Saved model not found')
                 game.load_model = False
 
             if game.show_heatmap:
-                show_q_heatmap(agent, game.grid_size, 0)
+                # Heatmap ready for regular Q-learning agents
+                # show_q_heatmap(agent, game.grid_size, 0)
+                print("Q-Heatmap: available for Q-learning agents, not NN-based")
                 game.show_heatmap = False
 
             if game.paused:
