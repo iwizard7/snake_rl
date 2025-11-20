@@ -19,6 +19,8 @@ class SnakeGameAI:
         self.save_model = False
         self.load_model = False
         self.show_heatmap = False
+        self.save_feedback = 0
+        self.load_feedback = 0
         self.display = pygame.display.set_mode((self.w, self.h + 80))
         pygame.display.set_caption('SnakeRL')
         self.clock = pygame.time.Clock()
@@ -155,15 +157,19 @@ class SnakeGameAI:
 
 
         # Save and Load buttons
-        save_color = GRAY
+        save_color = GREEN if self.save_feedback > 0 else GRAY
         pygame.draw.rect(self.display, save_color, pygame.Rect(10, HEIGHT + 45, 60, 30))
-        save_text = button_font.render('SAVE', True, BLACK)
-        self.display.blit(save_text, (15, HEIGHT + 50))
+        save_text = button_font.render('SAVED!' if self.save_feedback > 0 else 'SAVE', True, BLACK)
+        self.display.blit(save_text, (15 if self.save_feedback == 0 else 10, HEIGHT + 50))
+        if self.save_feedback > 0:
+            self.save_feedback -= 1
 
-        load_color = GRAY
+        load_color = BLUE if self.load_feedback > 0 else GRAY
         pygame.draw.rect(self.display, load_color, pygame.Rect(80, HEIGHT + 45, 60, 30))
-        load_text = button_font.render('LOAD', True, BLACK)
-        self.display.blit(load_text, (85, HEIGHT + 50))
+        load_text = button_font.render('LOADED!' if self.load_feedback > 0 else 'LOAD', True, BLACK)
+        self.display.blit(load_text, (85 if self.load_feedback == 0 else 75, HEIGHT + 50))
+        if self.load_feedback > 0:
+            self.load_feedback -= 1
 
         pygame.display.flip()
         self.clock.tick(SPEED)

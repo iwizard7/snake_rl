@@ -23,11 +23,13 @@ def train():
                 agent.model.save('saved_model.pth')
                 print('Model saved as saved_model.pth')
                 game.save_model = False
+                game.save_feedback = 90  # ~1.5 seconds visual feedback
 
             if game.load_model:
                 try:
                     agent.model.load_state_dict(torch.load('saved_model.pth'))
                     print('Model loaded from saved_model.pth')
+                    game.load_feedback = 90
                 except FileNotFoundError:
                     print('Saved model not found')
                 game.load_model = False
