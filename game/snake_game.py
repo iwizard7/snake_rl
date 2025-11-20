@@ -10,7 +10,7 @@ class SnakeGameAI:
     def __init__(self, w=WIDTH, h=HEIGHT):
         self.w = w
         self.h = h
-        self.display = pygame.display.set_mode((self.w, self.h))
+        self.display = pygame.display.set_mode((self.w, self.h + 60))
         pygame.display.set_caption('SnakeRL')
         self.clock = pygame.time.Clock()
         self.reset()
@@ -42,6 +42,13 @@ class SnakeGameAI:
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_p:
                     self.paused = not self.paused
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:  # left click
+                    x, y = pygame.mouse.get_pos()
+                    if 10 <= x <= 90 and HEIGHT + 10 <= y <= HEIGHT + 40:
+                        self.paused = False
+                    elif 100 <= x <= 180 and HEIGHT + 10 <= y <= HEIGHT + 40:
+                        self.paused = True
 
     def step(self, action):
         self.frame_iteration += 1
@@ -88,11 +95,25 @@ class SnakeGameAI:
         # Draw snake head in different color
         pygame.draw.rect(self.display, BLUE, pygame.Rect(self.head[0]*BLOCK_SIZE, self.head[1]*BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE))
 
+        # Score
         text = font.render("Score: " + str(self.score), True, WHITE)
         self.display.blit(text, [0, 0])
+
+        # Pause/play buttons
+        button_font = pygame.font.SysFont('arial', 16)
+        play_color = GREEN if not self.paused else GRAY
+        pygame.draw.rect(self.display, play_color, pygame.Rect(10, HEIGHT + 10, 80, 30))
+        play_text = button_font.render('PLAY', True, BLACK)
+        self.display.blit(play_text, (20, HEIGHT + 15))
+
+        pause_color = RED if self.paused else GRAY
+        pygame.draw.rect(self.display, pause_color, pygame.Rect(100, HEIGHT + 10, 80, 30))
+        pause_text = button_font.render('PAUSE', True, BLACK)
+        self.display.blit(pause_text, (110, HEIGHT + 15))
+
         if self.paused:
-            pause_text = font.render("PAUSED - Press P to Play", True, WHITE)
-            self.display.blit(pause_text, [0, 30])
+            pause_msg = font.render("PAUSED", True, RED)
+            self.display.blit(pause_msg, [0, 30])
         pygame.display.flip()
 
         self.clock.tick(SPEED)
